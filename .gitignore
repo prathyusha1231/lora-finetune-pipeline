@@ -88,3 +88,6 @@ htmlcov/
 !output/.gitkeep
 !results/.gitkeep
 !results/plots/.gitkeep
+
+# Summary
+summary.txt
