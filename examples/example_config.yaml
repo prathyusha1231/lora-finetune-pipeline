@@ -1,0 +1,37 @@
+# Example: Fine-tuning Mistral-7B for instruction following
+# This config is optimized for a 24GB GPU
+
+base_model: "mistralai/Mistral-7B-v0.1"
+tokenizer_name: null
+
+# LoRA settings optimized for instruction tuning
+lora_r: 32
+lora_alpha: 64
+lora_dropout: 0.05
+target_modules:
+  - q_proj
+  - k_proj
+  - v_proj
+  - o_proj
+  - gate_proj
+  - up_proj
+  - down_proj
+
+# 4-bit quantization for memory efficiency
+use_4bit: true
+use_8bit: false
+bnb_4bit_compute_dtype: "bfloat16"
+bnb_4bit_quant_type: "nf4"
+
+# Training settings
+num_train_epochs: 3
+per_device_train_batch_size: 2
+gradient_accumulation_steps: 8
+learning_rate: 0.0001
+warmup_ratio: 0.05
+max_seq_length: 1024
+
+# Output
+output_dir: "./output/mistral-instruct"
+logging_steps: 5
+save_steps: 50

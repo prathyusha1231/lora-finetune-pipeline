@@ -1,0 +1,35 @@
+# LoRA Fine-tuning Configuration
+# Adjust these parameters based on your model and hardware
+
+# Model Settings
+base_model: "meta-llama/Llama-2-7b-hf"  # or any HuggingFace model
+tokenizer_name: null  # Uses base_model if null
+
+# LoRA Hyperparameters
+lora_r: 16              # Rank of LoRA matrices (higher = more capacity, more memory)
+lora_alpha: 32          # Scaling factor (typically 2x lora_r)
+lora_dropout: 0.05      # Dropout for regularization
+target_modules:         # Which layers to apply LoRA to
+  - q_proj
+  - v_proj
+  - k_proj
+  - o_proj
+
+# Quantization Settings
+use_4bit: true          # Use 4-bit quantization (recommended for consumer GPUs)
+use_8bit: false         # Use 8-bit quantization (alternative)
+bnb_4bit_compute_dtype: "float16"
+bnb_4bit_quant_type: "nf4"
+
+# Training Hyperparameters
+num_train_epochs: 3
+per_device_train_batch_size: 4
+gradient_accumulation_steps: 4   # Effective batch size = batch_size * grad_accum
+learning_rate: 0.0002            # 2e-4 is a good starting point
+warmup_ratio: 0.03               # Warmup steps as ratio of total steps
+max_seq_length: 512              # Maximum sequence length
+
+# Output Settings
+output_dir: "./output"
+logging_steps: 10
+save_steps: 100

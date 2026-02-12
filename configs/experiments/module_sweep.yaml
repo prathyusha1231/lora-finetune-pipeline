@@ -1,0 +1,69 @@
+# LoRA Module Ablation Experiment Suite
+# Tests different combinations of target modules to identify most important layers
+
+suite_name: "module_ablation_sweep"
+
+# Base configuration
+base_model: "microsoft/phi-2"
+dataset_path: "data/alpaca_sample.jsonl"
+output_dir: "output"
+
+# Training settings
+num_train_epochs: 2
+per_device_train_batch_size: 4
+max_seq_length: 512
+seed: 42
+
+# Experiment variants - test different module combinations
+experiments:
+  - name: "qv_only"
+    type: "module_ablation"
+    target_modules: ["q_proj", "v_proj"]
+    # Minimal attention - Query and Value only
+    # Hypothesis: Q+V capture most important information
+    # Lowest parameter count
+
+  - name: "qkv"
+    type: "module_ablation"
+    target_modules: ["q_proj", "k_proj", "v_proj"]
+    # Standard attention - Q, K, V
+    # Most common configuration
+    # Moderate parameter count
+
+  - name: "qkvo"
+    type: "module_ablation"
+    target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]
+    # Full attention - Q, K, V, Output
+    # Includes output projection
+    # Higher parameter count
+
+  - name: "attention_only"
+    type: "module_ablation"
+    target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]
+    # Same as qkvo - full attention mechanism
+    # Baseline for comparison with MLP
+
+  - name: "attention_and_mlp"
+    type: "module_ablation"
+    target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+    # Full transformer block - Attention + MLP
+    # Maximum expressiveness
+    # Highest parameter count
+    # Most VRAM usage
+
+  - name: "mlp_only"
+    type: "module_ablation"
+    target_modules: ["gate_proj", "up_proj", "down_proj"]
+    # Only MLP layers - no attention
+    # Experimental: test if MLP alone is sufficient
+    # Useful for understanding contribution
+
+# Expected outcomes:
+# - Q+V should provide good baseline performance
+# - Adding K provides marginal improvement
+# - Including O (output projection) helps with representational capacity
+# - MLP layers add significant parameters but may not always improve accuracy
+# - Full attention+MLP gives best accuracy but highest resource cost
+#
+# Key insight: Most gains come from attention layers (Q,K,V,O)
+# MLP fine-tuning useful for domain adaptation but not always necessary

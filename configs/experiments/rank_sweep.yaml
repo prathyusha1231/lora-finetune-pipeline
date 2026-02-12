@@ -1,0 +1,49 @@
+# LoRA Rank Ablation Experiment Suite
+# Tests different LoRA rank values to study accuracy-memory tradeoff
+
+suite_name: "rank_ablation_sweep"
+
+# Base configuration (shared across all experiments)
+base_model: "microsoft/phi-2"  # Small model for fast experiments (2.7B params)
+dataset_path: "data/alpaca_sample.jsonl"
+output_dir: "output"
+
+# Training settings
+num_train_epochs: 2  # Reduced for faster experimentation
+per_device_train_batch_size: 4
+max_seq_length: 512
+seed: 42
+
+# Experiment variants - test different LoRA ranks
+experiments:
+  - name: "r4"
+    lora_rank: 4
+    # Ultra-low rank - minimal parameters but potentially lower accuracy
+    # Expected VRAM: ~6-7GB with 4-bit quantization
+
+  - name: "r8"
+    lora_rank: 8
+    # Low rank - good balance for limited GPU memory
+    # Expected VRAM: ~7-8GB with 4-bit quantization
+
+  - name: "r16"
+    lora_rank: 16
+    # Standard rank - commonly used default
+    # Expected VRAM: ~8-10GB with 4-bit quantization
+
+  - name: "r32"
+    lora_rank: 32
+    # High rank - better capacity at cost of memory
+    # Expected VRAM: ~12-14GB with 4-bit quantization
+
+  - name: "r64"
+    lora_rank: 64
+    # Very high rank - approaching full fine-tuning capacity
+    # Expected VRAM: ~16-18GB with 4-bit quantization
+
+# Expected outcomes:
+# - Higher ranks should achieve lower perplexity (better accuracy)
+# - Memory usage increases with rank
+# - Training time increases slightly with rank
+# - Model size (LoRA adapter) scales linearly with rank
+# - Diminishing returns expected above rank 32

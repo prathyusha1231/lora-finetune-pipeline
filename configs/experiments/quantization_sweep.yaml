@@ -1,0 +1,66 @@
+# Quantization Study Experiment Suite
+# Compares different quantization modes: 4-bit, 8-bit, and FP16
+
+suite_name: "quantization_study"
+
+# Base configuration
+base_model: "microsoft/phi-2"
+dataset_path: "data/alpaca_sample.jsonl"
+output_dir: "output"
+
+# Training settings
+num_train_epochs: 2
+per_device_train_batch_size: 4
+max_seq_length: 512
+seed: 42
+
+# Keep LoRA configuration constant across experiments
+# This isolates the quantization variable
+lora_r: 16
+lora_alpha: 32
+target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]
+
+# Experiment variants - test different quantization modes
+experiments:
+  - name: "4bit_nf4"
+    type: "quantization"
+    quantization_mode: "4bit"
+    # 4-bit NormalFloat quantization
+    # Most memory efficient
+    # Expected VRAM: ~6-8GB
+    # Minimal accuracy loss with NF4
+    # Recommended for consumer GPUs
+
+  - name: "8bit"
+    type: "quantization"
+    quantization_mode: "8bit"
+    # 8-bit quantization
+    # Better accuracy than 4-bit
+    # Expected VRAM: ~10-12GB
+    # Good balance for mid-range GPUs
+    # Slightly slower than 4-bit
+
+  # Uncomment if you have enough VRAM (24GB+)
+  # - name: "fp16"
+  #   type: "quantization"
+  #   quantization_mode: "fp16"
+  #   # Full precision (FP16)
+  #   # Best accuracy
+  #   # Expected VRAM: ~18-20GB
+  #   # Only for high-end GPUs (A100, 4090, etc.)
+  #   # Fastest training speed
+
+# Expected outcomes:
+# - 4-bit NF4 should have minimal accuracy degradation vs 8-bit
+# - 8-bit offers slight accuracy improvement at 1.5-2x memory cost
+# - FP16 is the accuracy ceiling but requires significant VRAM
+# - Training speed: FP16 > 8-bit > 4-bit (counterintuitive but true)
+# - Model size (adapter) is same across quantization modes
+#
+# Key insight: 4-bit quantization is remarkably effective
+# For most use cases, 4-bit NF4 is the optimal choice
+# Only use 8-bit/FP16 if you have strict accuracy requirements
+# and sufficient GPU memory
+#
+# Note: Quantization only affects base model storage
+# LoRA adapters are always trained in full precision
