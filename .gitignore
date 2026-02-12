@@ -72,7 +72,7 @@ results/experiments.db
 results/plots/*.png
 results/plots/*.jpg
 results/plots/*.pdf
-RESULTS.md
+# RESULTS.md
 
 # Temporary and cache
 tmp/
